@@ -1,0 +1,32 @@
+language: node_js
+node_js:
+- 4.2.1
+before_script:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- git clone https://github.com/jmurray87/InsightsCI.git CI
+- chmod +x CI/generate_tag.sh
+script:
+- "./node_modules/.bin/karma start ./test/karma.conf.js --browsers Chrome_travis_ci,Firefox,PhantomJS"
+- "./node_modules/.bin/eslint ./lib/"
+- "./node_modules/.bin/eslint ./test/"
+- export REPO_NAME=insights-utils
+- "./CI/generate_tag.sh"
+- export TRAVIS_TAG=`git tag --points-at HEAD | head -n1`
+deploy:
+  provider: npm
+  email: d2ltravisdeploy@d2l.com
+  api_key:
+    secure: W/BsLgt5neFP3GeDydiwFGuW2raTQzMXtvxZ9k8UfjgrVx7evzjSj48cUn93IeCjF3T/7hIB0qOlcleJaPbbIjC9ipnYx67SWgVx2gk7BvbicPuz4dPwPUyIcOGdGscEKhMvaLQymeDcF0hN6dmMmf41bNvHq3QU98a5KV/LlzgBlfG44UDCj9nfSibgn6PCGF8ZD4RYSPTX/dcT+CtLYspbv7w6p3yYm1B3CKJyoJU7WvnF/acjXAAnPDogSCPrQ6ZGuS6AIUJN9ytHklEOpwoRKzz6Rl8qq9TPWSfFnXyZXhXAaboG96B1F+SO1L7YIkJI0uLVaL+5WaVCXseKp5LsZP5WQaRMawSAym2dmYzB4R35Oi113AxHPG2zfSNYPgCjMb3YBCYmSqWma56usB/9R+hGG8uTgZr6tbg+ukaYtSGZWWiH7jWVEjSmaGJjNY/l31/i6y/bGhAVzMjgJ3TnwujzHLorGxanyS6AHSef4QkFUfLefSy/tN5sOHnv95ZS6CorCZTTQ4L5hjEtxo6Dn2ZBHGB8e0VHbBP+f0PxL1ritYngN7EoA9jL3VheIqGW5mXKeeEqgw5kpqvOfcEQStpGTNoSOdFhgh9AxpVCAP/Kd17k1shBQUPd6xw7ZpTSOMMeAXDhevlbyN9QvpJdlFsDtUQzQsThTqe/6ag=
+  on:
+    tags: true
+    repo: Brightspace/insights-utils
+env:
+  global:
+  # GITHUB_RELEASE_TOKEN (KGV3n...) - for release/tagging process
+  - secure: KGV3nzs+egw2tZWIq5KPwyI0msvFf4DZv4kt858VURlTWUVypveAQ+M+8qwoXIkiUBc/TdmcTEJ5x4VyQf4rpBHxHmjToP3tOltPJVOf7uMI6Wma0q1BQjeznEXOYfEKY/zxM2YUJqLzbAKEfKrzAvDXQtPVJ55r1o739GZ5kUfBbfPHDtEhIvBuhOj6YTYKMP0TbP0jnLavp2oKnSachNNQzR3/wphlqIfX5OrxTnoU2Bv+AT+x4emI/k0z1albV9MGfVbOIVroVck5XZ79K+0Zp4GZK70KREC9F820WGV7q54LakZikDegNtXXxVmn83GPr6dxIo64QqbC+BFcKbQK9PlUn6WnlS3/98N2u8xbJ/WJ4h/lvpiS5IW6nJYfFDurgjYS690rc4i7CoelGtrsAaig6Ro3Nr7gDZBHczaPtyGYe7MfLcIlUbjpt4Lmv0oPJ1oBFeYheGQZGQ6cj0I9JaDFArOkdzcJg/jaH/gzHmKeT6aFmRP3LVnskOAzww2ucQ6O82n1DwW3hRxk7N0mIyhJ21Gf+l7JKJF1mxwF/h0oabRqN71YJxDS3EPv9gkMscudgluyLqihFLUNHV4lyz4IhfUSqYzrajlx4QWi+TqZ9kAN3t7HmYMEYb7o7FZ0Z3zjVgV2jCHVMxS3cjPU3Yg4RLPDM8nhJLvu2NU=
+branches:
+  except:
+  #Stops ci from running on tag commits and branches
+  - "/^v?[0-9]+\\.[0-9]+\\.[0-9]+.*$/"
